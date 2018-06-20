@@ -154,6 +154,8 @@ more details on the ``emulate_tty`` parameter.
     and stderr, see :py:func:`osrf_pycommon.process_utils.execute_process`.
 :param bool stderr_to_stdout: if True, stderr is directed to stdout, so they
     are not captured separately.
+:param dict kwargs: all additional keyword arguments are passed to
+    subprocess.Popen, but you should not pass stdout, stderr, or stdin this way
 """
 
 

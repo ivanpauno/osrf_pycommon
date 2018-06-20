@@ -36,7 +36,7 @@ if sys.version_info < (3, 4) or 'trollius' in sys.modules:
     @asyncio.coroutine
     def _async_execute_process_nopty(
         protocol_class, cmd, cwd, env, shell,
-        stderr_to_stdout=True
+        stderr_to_stdout=True, **kwargs
     ):
         loop = get_loop()
         stderr = asyncio.subprocess.PIPE
@@ -46,11 +46,11 @@ if sys.version_info < (3, 4) or 'trollius' in sys.modules:
         if shell is True:
             transport, protocol = yield From(loop.subprocess_shell(
                 protocol_class, " ".join(cmd), cwd=cwd, env=env,
-                stderr=stderr, close_fds=False))
+                stderr=stderr, close_fds=False, **kwargs))
         else:
             transport, protocol = yield From(loop.subprocess_exec(
                 protocol_class, *cmd, cwd=cwd, env=env,
-                stderr=stderr, close_fds=False))
+                stderr=stderr, close_fds=False, **kwargs))
         raise Return(transport, protocol)
 
     if has_pty:
@@ -58,7 +58,7 @@ if sys.version_info < (3, 4) or 'trollius' in sys.modules:
         @asyncio.coroutine
         def _async_execute_process_pty(
             protocol_class, cmd, cwd, env, shell,
-            stderr_to_stdout=True
+            stderr_to_stdout=True, **kwargs
         ):
             loop = get_loop()
             # Create the PTY's
@@ -75,11 +75,11 @@ if sys.version_info < (3, 4) or 'trollius' in sys.modules:
             if shell is True:
                 transport, protocol = yield From(loop.subprocess_shell(
                     protocol_factory, " ".join(cmd), cwd=cwd, env=env,
-                    stdout=stdout_slave, stderr=stderr_slave, close_fds=False))
+                    stdout=stdout_slave, stderr=stderr_slave, close_fds=False, **kwargs))
             else:
                 transport, protocol = yield From(loop.subprocess_exec(
                     protocol_factory, *cmd, cwd=cwd, env=env,
-                    stdout=stdout_slave, stderr=stderr_slave, close_fds=False))
+                    stdout=stdout_slave, stderr=stderr_slave, close_fds=False, **kwargs))
 
             # Close our copies of the slaves,
             # the child's copy of the slave remain open until it terminates
@@ -131,14 +131,14 @@ if sys.version_info < (3, 4) or 'trollius' in sys.modules:
     @asyncio.coroutine
     def async_execute_process(
         protocol_class, cmd=None, cwd=None, env=None, shell=False,
-        emulate_tty=False, stderr_to_stdout=True
+        emulate_tty=False, stderr_to_stdout=True, **kwargs
     ):
         if emulate_tty:
             transport, protocol = yield From(_async_execute_process_pty(
                 protocol_class, cmd, cwd, env, shell,
-                stderr_to_stdout))
+                stderr_to_stdout, **kwargs))
         else:
             transport, protocol = yield From(_async_execute_process_nopty(
                 protocol_class, cmd, cwd, env, shell,
-                stderr_to_stdout))
+                stderr_to_stdout, **kwargs))
         raise Return(transport, protocol)
