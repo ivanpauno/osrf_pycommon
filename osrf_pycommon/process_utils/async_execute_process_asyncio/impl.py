@@ -30,7 +30,7 @@ def get_loop():
 
 @asyncio.coroutine
 def _async_execute_process_nopty(
-    protocol_class, cmd, cwd, env, shell,
+    protocol_class, cmd, cwd, env, shell, creationflags
     stderr_to_stdout=True
 ):
     loop = get_loop()
@@ -41,11 +41,11 @@ def _async_execute_process_nopty(
     if shell is True:
         transport, protocol = yield from loop.subprocess_shell(
             protocol_class, " ".join(cmd), cwd=cwd, env=env,
-            stderr=stderr, close_fds=False)
+            stderr=stderr, close_fds=False, creationflags=creationflags)
     else:
         transport, protocol = yield from loop.subprocess_exec(
             protocol_class, *cmd, cwd=cwd, env=env,
-            stderr=stderr, close_fds=False)
+            stderr=stderr, close_fds=False, creationflags=creationflags)
     return transport, protocol
 
 
@@ -53,7 +53,7 @@ if has_pty:
     # If pty is availabe, use them to emulate the tty
     @asyncio.coroutine
     def _async_execute_process_pty(
-        protocol_class, cmd, cwd, env, shell,
+        protocol_class, cmd, cwd, env, shell, creationflags,
         stderr_to_stdout=True
     ):
         loop = get_loop()
@@ -75,11 +75,13 @@ if has_pty:
         if shell is True:
             transport, protocol = yield from loop.subprocess_shell(
                 protocol_factory, " ".join(cmd), cwd=cwd, env=env,
-                stdout=stdout_slave, stderr=stderr_slave, close_fds=False)
+                stdout=stdout_slave, stderr=stderr_slave, close_fds=False,
+                creationflags=creationflags)
         else:
             transport, protocol = yield from loop.subprocess_exec(
                 protocol_factory, *cmd, cwd=cwd, env=env,
-                stdout=stdout_slave, stderr=stderr_slave, close_fds=False)
+                stdout=stdout_slave, stderr=stderr_slave, close_fds=False,
+                creationflags=creationflags)
 
         # Close our copies of the slaves,
         # the child's copy of the slave remain open until it terminates
@@ -132,14 +134,14 @@ else:
 @asyncio.coroutine
 def async_execute_process(
     protocol_class, cmd=None, cwd=None, env=None, shell=False,
-    emulate_tty=False, stderr_to_stdout=True
+    emulate_tty=False, stderr_to_stdout=True, creationflags=0
 ):
     if emulate_tty:
         transport, protocol = yield from _async_execute_process_pty(
-            protocol_class, cmd, cwd, env, shell,
+            protocol_class, cmd, cwd, env, shell, creationflags,
             stderr_to_stdout)
     else:
         transport, protocol = yield from _async_execute_process_nopty(
-            protocol_class, cmd, cwd, env, shell,
+            protocol_class, cmd, cwd, env, shell, creationflags,
             stderr_to_stdout)
     return transport, protocol
