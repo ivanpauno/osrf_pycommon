@@ -141,10 +141,10 @@ if sys.version_info < (3, 4) or 'trollius' in sys.modules:
     ):
         if emulate_tty:
             transport, protocol = yield From(_async_execute_process_pty(
-                protocol_class, cmd, cwd, env, shell, creationflags
+                protocol_class, cmd, cwd, env, shell, creationflags,
                 stderr_to_stdout))
         else:
             transport, protocol = yield From(_async_execute_process_nopty(
-                protocol_class, cmd, cwd, env, shell, creationflags
+                protocol_class, cmd, cwd, env, shell, creationflags,
                 stderr_to_stdout))
         raise Return(transport, protocol)
