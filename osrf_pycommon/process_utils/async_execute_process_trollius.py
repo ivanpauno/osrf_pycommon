@@ -35,7 +35,7 @@ if sys.version_info < (3, 4) or 'trollius' in sys.modules:
 
     @asyncio.coroutine
     def _async_execute_process_nopty(
-        protocol_class, cmd, cwd, env, shell, creationflags
+        protocol_class, cmd, cwd, env, shell, creationflags,
         stderr_to_stdout=True
     ):
         loop = get_loop()
@@ -57,7 +57,7 @@ if sys.version_info < (3, 4) or 'trollius' in sys.modules:
         # If pty is availabe, use them to emulate the tty
         @asyncio.coroutine
         def _async_execute_process_pty(
-            protocol_class, cmd, cwd, env, shell, creationflags
+            protocol_class, cmd, cwd, env, shell, creationflags,
             stderr_to_stdout=True
         ):
             loop = get_loop()

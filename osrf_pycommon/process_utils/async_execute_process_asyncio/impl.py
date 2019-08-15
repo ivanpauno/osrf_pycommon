@@ -30,7 +30,7 @@ def get_loop():
 
 @asyncio.coroutine
 def _async_execute_process_nopty(
-    protocol_class, cmd, cwd, env, shell, creationflags
+    protocol_class, cmd, cwd, env, shell, creationflags,
     stderr_to_stdout=True
 ):
     loop = get_loop()
